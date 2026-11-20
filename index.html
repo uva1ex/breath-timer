@@ -959,17 +959,21 @@
   }
 
   .orb {
+    --rank-color: #8aa0b8;
+    --rank-rgb: 138, 160, 184;
     position: relative;
     width: 58%;
     aspect-ratio: 1;
     border-radius: 50%;
+    isolation: isolate;
     background:
-      radial-gradient(circle at 36% 30%, rgba(255, 255, 255, .98), rgba(190, 245, 255, .62) 11%, rgba(var(--accent-rgb), .58) 29%, rgba(16, 48, 92, .55) 58%, rgba(3, 8, 18, .96) 76%);
+      radial-gradient(circle at 35% 28%, rgba(255, 255, 255, .18), transparent 18%),
+      radial-gradient(circle at 50% 48%, #081526 0 38%, #050d1a 56%, rgba(var(--accent-rgb), .26) 74%, rgba(var(--accent-rgb), .48) 88%, rgba(2, 7, 16, .98) 100%);
     box-shadow:
-      inset 0 0 52px rgba(var(--accent-rgb), .72),
-      inset 0 0 16px rgba(255, 255, 255, .5),
-      0 0 42px rgba(var(--accent-rgb), .45),
-      0 0 120px rgba(var(--accent-rgb), .18);
+      inset 0 0 46px rgba(var(--accent-rgb), .55),
+      inset 0 0 100px rgba(0, 0, 0, .55),
+      0 0 42px rgba(var(--accent-rgb), .4),
+      0 0 120px rgba(var(--accent-rgb), .16);
     animation: orbBreathe 6s ease-in-out infinite;
     will-change: transform;
   }
@@ -977,6 +981,7 @@
   .orb-plasma {
     position: absolute;
     inset: -16%;
+    z-index: 0;
     border-radius: 50%;
     background: conic-gradient(
       from 0deg,
@@ -990,28 +995,149 @@
     );
     filter: blur(13px);
     mix-blend-mode: screen;
-    opacity: .8;
+    opacity: .78;
     animation: spin 14s linear infinite;
     pointer-events: none;
   }
 
-  .orb-core {
+  /* Мягкая энергия за портретом: лицо остаётся читаемым,
+     а свечение пульсирует вместе с орбом. */
+  .orb-rank-backlight {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 26%;
-    aspect-ratio: 1;
+    inset: 13%;
+    z-index: 0;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, #fff 0%, rgba(215, 250, 255, .92) 34%, rgba(var(--accent-rgb), .42) 64%, transparent 76%);
-    filter: blur(2px);
-    animation: corePulse 3.2s ease-in-out infinite;
+    background: radial-gradient(circle at 50% 46%, rgba(255, 255, 255, .78) 0, rgba(var(--accent-rgb), .42) 30%, transparent 70%);
+    filter: blur(18px);
+    mix-blend-mode: screen;
+    opacity: .48;
+    animation: orbBacklightPulse 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .orb-rank {
+    position: absolute;
+    inset: 6.5%;
+    z-index: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    mix-blend-mode: screen;
+    -webkit-mask-image: radial-gradient(circle at 50% 46%, #000 0 48%, rgba(0, 0, 0, .99) 58%, rgba(0, 0, 0, .72) 78%, transparent 96%);
+    mask-image: radial-gradient(circle at 50% 46%, #000 0 48%, rgba(0, 0, 0, .99) 58%, rgba(0, 0, 0, .72) 78%, transparent 96%);
+    pointer-events: none;
+  }
+
+  .orb-rank-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 40%;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(1.06);
+    filter: saturate(.16) contrast(1.2) brightness(.86);
+    animation: rankCoreBreathe 3.2s ease-in-out infinite;
+    transition: opacity .5s ease, transform .8s cubic-bezier(.2, .8, .2, 1);
+    will-change: opacity, transform, filter;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .orb-rank-img.is-active {
+    opacity: 1;
+    transform: scale(1.13);
+  }
+
+  /* Дуотон в цвет текущего звания: портрет становится
+     голограммой-ядром, а не вклеенной фотографией. */
+  .orb-rank-tint {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(var(--rank-rgb), .94) 0 36%, rgba(var(--rank-rgb), .68) 54%, rgba(139, 92, 255, .7) 76%, rgba(2, 6, 14, .96) 100%);
+    mix-blend-mode: color;
+    opacity: .9;
+    pointer-events: none;
+  }
+
+  .orb-rank-overlay {
+    position: absolute;
+    inset: 6.5%;
+    z-index: 2;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 44%, transparent 36%, rgba(2, 6, 14, .1) 56%, rgba(2, 6, 14, .62) 82%, rgba(2, 6, 14, .94) 100%),
+      linear-gradient(155deg, rgba(var(--accent-rgb), .16), transparent 44%, rgba(139, 92, 255, .17) 80%, transparent);
+    mix-blend-mode: soft-light;
+  }
+
+  .orb-rank-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .075) 0 1px, transparent 1px 3px);
+    background-size: 100% 3px;
+    mix-blend-mode: overlay;
+    opacity: .38;
+    animation: orbScanShift 5s linear infinite;
+  }
+
+  .orb-rank-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, .72), rgba(var(--accent-rgb), .34) 38%, transparent 68%);
+    opacity: 0;
+  }
+
+  .orb.rank-shift .orb-rank-overlay::after {
+    animation: orbRankFlash .65s ease-out;
+  }
+
+  .orb-shell {
+    position: absolute;
+    inset: 4%;
+    z-index: 3;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .13);
+    box-shadow:
+      inset 0 0 26px rgba(var(--accent-rgb), .34),
+      inset 0 0 72px rgba(0, 0, 0, .58),
+      0 0 28px var(--rank-color);
+    pointer-events: none;
+  }
+
+  .orb-shell::before {
+    content: '';
+    position: absolute;
+    inset: -3%;
+    border-radius: 50%;
+    background: conic-gradient(from 200deg, transparent 0 55%, var(--rank-color) 68%, transparent 72%, transparent 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px));
+    opacity: .7;
+    animation: spin 18s linear infinite;
+  }
+
+  .orb-shell::after {
+    content: '';
+    position: absolute;
+    inset: 6%;
+    border-radius: 50%;
+    border: 1px solid rgba(var(--accent-rgb), .12);
   }
 
   .orb-flare {
     position: absolute;
     left: 27%;
     top: 21%;
+    z-index: 4;
     width: 16%;
     height: 10%;
     border-radius: 50%;
@@ -1019,6 +1145,7 @@
     filter: blur(4px);
     transform: rotate(-32deg);
     opacity: .9;
+    pointer-events: none;
   }
 
   .orb.rank-pulse { animation: rankPulse .85s cubic-bezier(.16, 1, .3, 1); }
@@ -1027,12 +1154,15 @@
   body[data-phase="countdown"] .orb { animation: orbCharge 1s ease-in-out infinite; }
   body[data-phase="countdown"] .orb-ring--1 { animation-duration: 5s; }
   body[data-phase="countdown"] .orb-halo { animation-duration: 1s; }
+  body[data-phase="countdown"] .orb-rank-backlight,
+  body[data-phase="countdown"] .orb-rank-img { animation-duration: 1s; }
 
   body[data-phase="running"] .orb { animation-duration: 2.9s; }
   body[data-phase="running"] .orb-halo { animation-duration: 2.9s; }
   body[data-phase="running"] .orb-ring--1 { animation-duration: 8s; }
   body[data-phase="running"] .orb-ring--3 { animation-duration: 5s; }
-  body[data-phase="running"] .orb-core { animation-duration: 1.4s; }
+  body[data-phase="running"] .orb-rank-backlight,
+  body[data-phase="running"] .orb-rank-img { animation-duration: 1.4s; }
   body[data-phase="running"] .orb.rank-pulse { animation-duration: .85s; }
 
   body[data-phase="locking"] .orb { animation: orbCollapse .45s ease-in forwards; }
@@ -2041,9 +2171,25 @@
     50% { opacity: 1; transform: scale(1.06); }
   }
 
-  @keyframes corePulse {
-    0%, 100% { opacity: .9; transform: translate(-50%, -50%) scale(.94); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  @keyframes orbBacklightPulse {
+    0%, 100% { opacity: .4; transform: scale(.96); }
+    50% { opacity: .62; transform: scale(1.05); }
+  }
+
+  @keyframes rankCoreBreathe {
+    0%, 100% { filter: saturate(.16) contrast(1.2) brightness(.82); }
+    50% { filter: saturate(.24) contrast(1.24) brightness(1.02); }
+  }
+
+  @keyframes orbScanShift {
+    from { background-position: 0 0; }
+    to { background-position: 0 12px; }
+  }
+
+  @keyframes orbRankFlash {
+    0% { opacity: 0; transform: scale(.9); }
+    22% { opacity: .8; }
+    100% { opacity: 0; transform: scale(1.18); }
   }
 
   @keyframes orbCharge {
@@ -2547,7 +2693,7 @@
       scroll-behavior: auto !important;
     }
 
-    .orb, .orb-halo, .orb-core, .orb-plasma,
+    .orb, .orb-halo, .orb-plasma, .orb-rank-img, .orb-rank-backlight, .orb-shell::before,
     .aurora, .brand-mark, .orb-ring { animation: none !important; }
 
     .result-layer { transition: none; }
@@ -2725,7 +2871,14 @@
 
               <div class="orb" id="orb" aria-hidden="true">
                 <span class="orb-plasma"></span>
-                <span class="orb-core"></span>
+                <span class="orb-rank-backlight"></span>
+                <div class="orb-rank" id="orbRank">
+                  <img class="orb-rank-img is-active" id="orbRankA" src="1.png" alt="" draggable="false" decoding="async">
+                  <img class="orb-rank-img" id="orbRankB" alt="" draggable="false" decoding="async">
+                  <span class="orb-rank-tint"></span>
+                </div>
+                <span class="orb-rank-overlay"></span>
+                <span class="orb-shell"></span>
                 <span class="orb-flare"></span>
               </div>
 
@@ -3490,6 +3643,8 @@
   const scaleMarks = $('#scaleMarks');
   const countdownEl = $('#countdown');
   const orbEl = $('#orb');
+  const orbRankEl = $('#orbRank');
+  const orbRankImgs = [$('#orbRankA'), $('#orbRankB')];
 
   const setupPanel = $('#setupPanel');
   const startBtn = $('#startBtn');
@@ -3562,6 +3717,10 @@
   let lastScalePercent = -1;
   let lastScaleAria = -1;
   let lastScaleRank = -1;
+  let orbRankFront = 0;
+  let orbRankSlug = '';
+  let orbRankRequest = 0;
+  let orbRankFlashTimer = 0;
 
   /* ============================================================
      CANVAS: ZVEZDY + CHASTICY
@@ -3845,8 +4004,7 @@
 
     applyAccent(MODE_COLORS[mode]);
     timerModeEl.textContent = 'РЕЖИМ: ' + MODE_LABELS[mode];
-    liveRankEl.textContent = 'УРОВЕНЬ: ДЕБЮТАНТ';
-    liveRankEl.style.color = '';
+    syncOrbRank(Boolean(silent));
 
     orbEl.classList.remove('mode-shift');
     void orbEl.offsetWidth;
@@ -3859,6 +4017,7 @@
     progressRing.style.filter = 'drop-shadow(0 0 6px ' + MODE_COLORS[mode] + 'cc)';
     renderScaleMarks(mode);
     resetScale();
+    showBestScale();
     updateStats();
 
     if (!silent) audio.uiClick();
@@ -3878,6 +4037,7 @@
     progressRing.style.strokeDashoffset = '100';
     progressRing.style.stroke = MODE_COLORS[state.mode];
     resetScale();
+    showBestScale();
   }
 
   function scaleMaxForMode(mode) {
@@ -3980,6 +4140,10 @@
     updateScaleMarks(seconds);
   }
 
+  function showBestScale() {
+    updateScale((store.best[state.mode] || 0) / 1000);
+  }
+
   function showCountdownText(text, isGo) {
     countdownEl.textContent = text;
     countdownEl.classList.toggle('is-go', Boolean(isGo));
@@ -3995,9 +4159,92 @@
     countdownEl.textContent = '';
   }
 
-  function updateLiveRank(rank) {
+  function setRankLabel(rank) {
     liveRankEl.textContent = 'УРОВЕНЬ: ' + rank.name.toUpperCase();
     liveRankEl.style.color = rank.color;
+  }
+
+  function bestRankForMode(mode) {
+    return getRank(mode, (store.best[mode] || 0) / 1000);
+  }
+
+  function displayRank() {
+    if (state.phase === 'running' || state.phase === 'locking') {
+      return getRank(state.mode, state.elapsed / 1000);
+    }
+    return bestRankForMode(state.mode);
+  }
+
+  function setOrbRank(rank, instant) {
+    const src = RANK_IMAGES[rank.slug] || RANK_IMAGES.debutant;
+    const rankRgb = hexToRgb(rank.color);
+    orbEl.style.setProperty('--rank-color', rank.color);
+    orbEl.style.setProperty('--rank-rgb', rankRgb.r + ',' + rankRgb.g + ',' + rankRgb.b);
+    orbRankEl.dataset.rank = rank.slug;
+
+    if (instant) {
+      orbRankRequest += 1;
+      const front = orbRankImgs[orbRankFront];
+      const back = orbRankImgs[1 - orbRankFront];
+      front.src = src;
+      front.classList.add('is-active');
+      back.classList.remove('is-active');
+      orbRankSlug = rank.slug;
+      orbEl.classList.remove('rank-shift');
+      return;
+    }
+
+    if (rank.slug === orbRankSlug) return;
+
+    const nextIndex = 1 - orbRankFront;
+    const current = orbRankImgs[orbRankFront];
+    const next = orbRankImgs[nextIndex];
+    const token = ++orbRankRequest;
+    let done = false;
+
+    next.classList.remove('is-active');
+    next.onload = null;
+    next.onerror = null;
+
+    function swap() {
+      if (done || token !== orbRankRequest) return;
+      done = true;
+      next.classList.add('is-active');
+      current.classList.remove('is-active');
+      orbRankFront = nextIndex;
+      orbRankSlug = rank.slug;
+
+      window.clearTimeout(orbRankFlashTimer);
+      orbEl.classList.remove('rank-shift');
+      void orbEl.offsetWidth;
+      orbEl.classList.add('rank-shift');
+      orbRankFlashTimer = window.setTimeout(function () {
+        orbEl.classList.remove('rank-shift');
+      }, 700);
+    }
+
+    next.onload = swap;
+    next.onerror = function () {
+      if (done || token !== orbRankRequest) return;
+      done = true;
+      next.classList.remove('is-active');
+    };
+    next.src = src;
+
+    if (next.complete && next.naturalWidth > 0) swap();
+  }
+
+  function syncOrbRank(instant) {
+    const rank = displayRank();
+    if (state.phase !== 'running' && state.phase !== 'locking') {
+      setRankLabel(rank);
+    }
+    setOrbRank(rank, Boolean(instant));
+  }
+
+  function updateLiveRank(rank) {
+    setRankLabel(rank);
+    setOrbRank(rank);
 
     window.clearTimeout(state.rankPulseTimer);
     orbEl.classList.remove('rank-pulse');
@@ -4065,8 +4312,6 @@
     setTimerIdle();
     hideCountdown();
 
-    liveRankEl.textContent = 'УРОВЕНЬ: ДЕБЮТАНТ';
-    liveRankEl.style.color = '';
     timerModeEl.textContent = 'РЕЖИМ: ' + MODE_LABELS[state.mode];
     startLabel.textContent = 'СТАРТ';
     startSub.textContent = 'SPACE';
@@ -4081,6 +4326,7 @@
     app.inert = false;
     setupPanel.inert = false;
     updateStats();
+    syncOrbRank();
   }
 
   function beginCountdown() {
@@ -4098,6 +4344,7 @@
     state.countdownEnd = performance.now() + 3000;
     state.lastCount = 3;
     state.lastRank = -1;
+    syncOrbRank();
 
     startLabel.textContent = 'ОТМЕНА';
     startSub.textContent = 'ESC';
@@ -4116,6 +4363,7 @@
   }
 
   function beginRunning(now) {
+    const startRank = RANKS[state.mode][0];
     state.phase = 'running';
     state.startTs = now;
     state.elapsed = 0;
@@ -4139,6 +4387,8 @@
     progressRing.style.stroke = MODE_COLORS[state.mode];
     progressRing.style.strokeDashoffset = '100';
     resetScale();
+    setRankLabel(startRank);
+    setOrbRank(startRank);
 
     audio.cancelCharge();
     audio.go();
@@ -4194,6 +4444,9 @@
 
     const seconds = elapsed / 1000;
     const tier = tierFor(seconds);
+    const finalRank = getRank(state.mode, seconds);
+    setRankLabel(finalRank);
+    setOrbRank(finalRank);
 
     renderTimer(elapsed);
     audio.impact(tier === 'epic');
