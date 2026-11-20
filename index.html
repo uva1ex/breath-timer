@@ -52,6 +52,15 @@
   html {
     background: var(--bg);
     -webkit-text-size-adjust: 100%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 
   body {
@@ -59,6 +68,8 @@
     min-height: 100vh;
     min-height: 100dvh;
     overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background:
       radial-gradient(ellipse 70% 55% at 18% 0%, rgba(77, 225, 255, .10), transparent 60%),
       radial-gradient(ellipse 65% 60% at 85% 100%, rgba(139, 92, 255, .13), transparent 62%),
@@ -1606,6 +1617,8 @@
     place-items: center;
     padding: clamp(16px, 3vw, 32px);
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     overscroll-behavior: contain;
     background: rgba(2, 4, 10, .74);
     -webkit-backdrop-filter: blur(10px) saturate(.8);
@@ -1619,6 +1632,12 @@
   }
 
   .result-layer.is-open { opacity: 1; pointer-events: auto; }
+
+  .result-layer::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 
   .result-layer[hidden] { display: none; }
 
@@ -1663,6 +1682,17 @@
     z-index: 1;
     width: 100%;
     height: 100%;
+    pointer-events: none;
+  }
+
+  /* Отдельный клип-слой для ударных волн: они не участвуют
+     в прокрутке result-layer и не могут вызвать скроллбары. */
+  .result-fx {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    contain: layout paint;
     pointer-events: none;
   }
 
@@ -2120,7 +2150,7 @@
   .fx-shake-soft { animation: screenShakeSoft .32s ease-in-out both; }
 
   .shockwave {
-    position: fixed;
+    position: absolute;
     z-index: 1;
     width: 24px;
     height: 24px;
@@ -2920,6 +2950,7 @@
 <div class="result-layer" id="resultLayer" hidden aria-hidden="true">
   <div class="result-glow" aria-hidden="true"></div>
   <canvas id="fxCanvas" aria-hidden="true"></canvas>
+  <div class="result-fx" id="resultFxLayer" aria-hidden="true"></div>
 
   <div class="result-card" id="resultCard" role="dialog" aria-modal="true" aria-labelledby="rankName" aria-describedby="rankSub">
     <span class="card-corner card-corner--tl" aria-hidden="true"></span>
@@ -3661,6 +3692,7 @@
 
   const resultLayer = $('#resultLayer');
   const resultCard = $('#resultCard');
+  const resultFxLayer = $('#resultFxLayer');
   const resultTimeEl = $('#resultTime');
   const rankNameEl = $('#rankName');
   const rankSubEl = $('#rankSub');
@@ -3891,7 +3923,7 @@
     ring.style.borderColor = color;
     ring.style.boxShadow = '0 0 30px ' + color;
     ring.style.setProperty('--shock-scale', String(scale || 18));
-    resultLayer.appendChild(ring);
+    resultFxLayer.appendChild(ring);
     ring.addEventListener('animationend', function () {
       ring.remove();
     });
